@@ -2,9 +2,10 @@ from django.db import models
 from datetime import datetime 
 
 class twitteruser(models.Model):
-    userID = models.AutoField(primary_key=True)
+    username = models.CharField(max_length=45, primary_key=True)
     FirstName = models.CharField(max_length=45)
     LastName = models.CharField(max_length=45)
+    password = models.CharField(max_length=45)
     
 class tweet(models.Model):
     tweetID = models.AutoField(primary_key=True)
