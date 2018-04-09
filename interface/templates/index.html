@@ -1,17 +1,72 @@
 <!DOCTYPE html>
 <html>
     <head>
+    
+        <title>Twitter Clone</title>
 
     </head>
 
     <body>
-
-        <h1>Twitter Clone Login</h1>
-        
-        <div>
-        
-            <p>Username: <input type="text" name="username"></input></p>
-            <p>Password: <input type="password" name="password"></input></p>
+    
+        <div align="center">
+            
+            {% include 'header.html' %}
+            
+            <div style="width: 50%; border: 1px solid black;">
+                    <form action="{% url 'search'%}" method="post">
+                        {% csrf_token %}
+                        <h2>Search</h2>
+                        <input type="text" placeholder="Search for other users!" name="search"></input><button>Submit</button>
+                    </form>
+                <br>
+            </div>
+                        
+            <div style="width: 50%; border: 1px solid black;">
+                <h2>Timeline</h2>
+                <form action="{% url 'index'%}?view={{ view }}" method="post">
+                    {% csrf_token %}
+                    
+                    <textarea placeholder="Tell the world what you're thinking about..." maxlength="140" name="message" style="resize: none; width: 50%; height: 32px;"></textarea>
+                    <br>
+                    <button name="tweeting" value="1">Submit</button>
+                </form>
+                <br>
+                
+                <div style="width: 75%; border: 1px solid black;">
+                    <br>
+                    <div>
+                        View: 
+                        <a href="{% url 'index' %}?view=all">All,</a>
+                        <a href="{% url 'index' %}?view=favorites">Favorites,</a>
+                        <a href="{% url 'index' %}?view=retweets">Retweeets</a>
+                    </div>
+                    <div style="width: 80%; max-height: 400px; overflow: auto; overflow-x: hidden;">
+                        <ul style="list-style-type: none; padding-right: 40px;">
+                            {% for i in tweets %}
+                            <li style="border: 1px solid black; padding: 5px 0px 5px 0px;">
+                                <p style="display: inline; padding-right: 100%;">&nbsp;{{ i.posterID_id }}</p>
+                                <br>{{ i.Message }}<br>
+                                <p style="display: inline; font-size: 10px;">posted: {{ i.PostTime }}</p>
+                                <br>
+                                <p style="display: inline; font-size: 10px;">
+                                    <a href="{% url 'index' %}?view={{ view }}&favorite={{ i.tweetID }}">Favorite</a> - 
+                                    <a href="{% url 'index' %}?view={{ view }}&retweet={{ i.tweetID }}">Retweet</a><br>
+                                    {% if i.posterID_id == request.user.username %}
+                                    <a href="{% url 'index' %}?view={{ view }}&deleted={{ i.tweetID }}">Delete</a>
+                                    {% endif %}
+                                </p>
+                            </li>
+                            {% endfor %}
+                            {% if not tweets %}
+                            <li style="border: 1px solid black; padding: 5px 0px 5px 0px;">
+                                <p style="display: inline;">&nbsp;Empty...</p>
+                            </li>
+                            {% endif %}
+                        <ul>
+                    </div>
+                </div>
+                <br>
+            </div>
         
         </div>
     

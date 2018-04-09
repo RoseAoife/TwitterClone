@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    
+        <title>Twitter Clone</title>
+
+    </head>
+
+    <body>
+        
+        <center>
+
+            {% include 'header.html' %}
+            
+            <p>Profile Search</p>
+            
+            <div style="width: 80%; max-height: 400px; overflow: auto; overflow-x: hidden;">
+                <ul style="list-style-type: none; padding-right: 40px;">
+                    {% for i in user_list %}
+                    <li style="border: 1px solid black; padding: 5px 0px 5px 0px;">{{ i }} - <a href="{% url 'profile' %}?user={{ i }}">View Profile</a></li>
+                    {% endfor %}
+                <ul>
+            </div>
+        
+        </center>
+    
+    </body>
+
+</html>

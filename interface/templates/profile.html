@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    
+        <title>Twitter Clone</title>
+
+    </head>
+
+    <body>
+        
+        <center>
+
+            {% include 'header.html' %}
+            
+            <div style="width: 50%; border: 1px solid black;">
+            <p>{{ user_data }}'s Profile</p>
+            
+            {% if already_following is False %}
+            <form action="{% url 'profile'%}?view={{ view }}&user={{ user_data }}" method="post">
+                {% csrf_token %}
+                <button name='follow' value='1'>Follow</button>
+            </form>
+            <br>
+            {% endif %}
+            {% if already_following is None %}
+            <form action="{% url 'profile'%}?view={{ view }}&user={{ user_data }}" method="post">
+                {% csrf_token %}
+                <button name='follow' value='2'>Unfollow</button>
+            </form>
+            <br>
+            {% endif %}
+            {% if user_data == request.user.username %}
+            <form action="{% url 'profile'%}?user={{ user_data }}" method="post">
+                {% csrf_token %}
+                <button name='delete_user' value='1'>Delete Account</button>
+            </form>
+            <br>
+            {% endif %}
+            </div>
+            
+            <div style="width: 50%; border: 1px solid black;">
+                <div>
+                    <h4>Following:</h4>
+                    <ul style="list-style-type: none; padding-right: 40px;">
+                        {% for i in following %}
+                        <li><a href="{% url 'profile' %}?user={{ i }}">{{ i }}</a></li>
+                        {% endfor %}
+                        {% if not following %}
+                        <li>Empty...</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div>
+                    <h4>Followers:</h4>
+                    <ul style="list-style-type: none; padding-right: 40px;">
+                        {% for i in followers %}
+                        <li><a href="{% url 'profile' %}?user={{ i }}">{{ i }}</a></li>
+                        {% endfor %}
+                        {% if not followers %}
+                        <li>Empty...</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            <div style="width: 50%; border: 1px solid black;">
+                <h2>Posts</h2>
+                
+                <div style="width: 75%; border: 1px solid black;">
+                    <br>
+                    <div>
+                        View: 
+                        <a href="{% url 'profile' %}?user={{ user_data }}&view=all">All,</a>
+                        <a href="{% url 'profile' %}?user={{ user_data }}&view=favorites">Favorites,</a>
+                        <a href="{% url 'profile' %}?user={{ user_data }}&view=retweets">Retweeets</a>
+                    </div>
+                    <div style="width: 80%; max-height: 400px; overflow: auto; overflow-x: hidden;">
+                        <ul style="list-style-type: none; padding-right: 40px;">
+                            {% for i in tweets %}
+                            <li style="border: 1px solid black; padding: 5px 0px 5px 0px;">
+                                <p style="display: inline; padding-right: 100%;">&nbsp;{{ i.posterID_id }}</p>
+                                <br>{{ i.Message }}<br>
+                                <p style="display: inline; font-size: 10px;">posted: {{ i.PostTime }}</p>
+                                <br>
+                                <p style="display: inline; font-size: 10px;">
+                                    <a href="{% url 'profile' %}?view={{ view }}&user={{  user_data }}&favorite={{ i.tweetID }}">Favorite</a> - 
+                                    <a href="{% url 'profile' %}?view={{ view }}&user={{  user_data }}&retweet={{ i.tweetID }}">Retweet</a>
+                                </p>
+                            </li>
+                            {% endfor %}
+                            {% if not tweets %}
+                            <li style="border: 1px solid black; padding: 5px 0px 5px 0px;">
+                                <p style="display: inline;">&nbsp;Empty...</p>
+                            </li>
+                            {% endif %}
+                        <ul>
+                    </div>
+                </div>
+                <br>
+            </div>
+        
+        </center>
+    
+    </body>
+
+</html>

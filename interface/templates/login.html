@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    
+        <title>Twitter Clone Login</title>
+
+    </head>
+
+    <body>
+
+        <center>
+    
+            <h1>Twitter Clone Login</h1>
+            
+            <form action="{% url 'login_page'%}" method="post">
+            {% csrf_token %}
+            
+                <div>
+                
+                    <p>Username: <input type="text" name="username"></input></p>
+                    <p>Password: <input type="password" name="password"></input></p>
+                    <button type="submit">Login</button>
+                
+                </div>
+                
+                <br>
+                
+                <a href="{% url 'signup' %}">Signup</a>
+                
+                {% if error %}
+                    <div>
+                        <p>{{ error }}</p>
+                    </div>
+                {% endif %}
+            
+            </form>
+        
+        </center>
+    
+    </body>
+
+</html>
