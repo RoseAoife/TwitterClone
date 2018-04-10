@@ -1,7 +1,7 @@
 <h1>Twitter Clone</h1>
 
 <div style="width: 50%; border: 1px solid black;">  
-    <p>Hey there, {{ request.user.username }}!<p>
+    <p style="word-break: break-all;">Hey there, {{ request.user.username }}!<p>
     <a href="{% url 'index' %}">Timeline</a> - 
     <a href="{% url 'profile' %}?user={{ request.user.username }}">Profile</a> - 
     <a href="{% url 'logout_view' %}">Logout</a>

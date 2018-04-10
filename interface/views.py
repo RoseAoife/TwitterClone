@@ -54,39 +54,44 @@ def index(request):
         retweets = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
         current_user = twitteruser.objects.get(username=request.user.username)
         
+        favorited = request.GET.get('favorite')
+        retweeted = request.GET.get('retweet')
+        deleted = request.GET.get('deleted')
+
+        if favorited:
+            if int(favorited) not in favorites:
+                favorite.objects.create(tweetID_id=int(favorited), userID_id=current_user.username)
+            else:
+                favorite.objects.get(tweetID_id=int(favorited), userID_id=current_user.username).delete()
+            return redirect(index)
+        if retweeted:
+            if int(retweeted) not in retweets:
+                retweet.objects.create(tweetID_id=int(retweeted), userID_id=current_user.username)
+            else:
+                retweet.objects.get(tweetID_id=int(retweeted), userID_id=current_user.username).delete()
+            return redirect(index)
+        if deleted:
+            tweet.objects.get(tweetID=int(deleted), posterID_id=current_user.username).delete()
+            return redirect(index)
+            
         view = request.GET.get('view')
         if view == 'favorites':
             tweets = list(tweet.objects.filter(tweetID__in=favorites).values())
         elif view == 'retweets':
             tweets = list(tweet.objects.filter(tweetID__in=retweets).values())
         else:
-            tweets = list(tweet.objects.filter(posterID_id__in=following).values())
-        
+            tweets = list(tweet.objects.filter(posterID_id__in=following).values())    
+
         sorted_tweets = [(dict_['PostTime'], dict_) for dict_ in tweets]
         sorted_tweets.sort(reverse=True)
         sorted_tweets = [dict_ for (key, dict_) in sorted_tweets]
-        
-        favorited = request.GET.get('favorite')
-        retweeted = request.GET.get('retweet')
-        deleted = request.GET.get('deleted')
-
-        if favorited:
-            favorite.objects.create(tweetID_id=int(favorited), userID_id=current_user.username)
-            return redirect(index)
-        if retweeted:
-            retweet.objects.create(tweetID_id=int(retweeted), userID_id=current_user.username)
-            return redirect(index)
-        if deleted:
-            tweet.objects.get(tweetID=int(deleted), posterID_id=current_user.username).delete()
-            return redirect(index)
-            
         
         if request.method == 'POST':
             tweet.objects.create(posterID_id=current_user.username, Message=request.POST['message'], PostTime=datetime.datetime.now())
             return redirect(index)
             
         else:
-            return render(request, 'index.html', {'tweets': sorted_tweets, 'view': view})
+            return render(request, 'index.html', {'tweets': sorted_tweets, 'view': view, 'favorites': favorites, 'retweets': retweets})
     else:
         return render(request, 'login.html') 
         
@@ -121,14 +126,16 @@ def profile(request):
         retweet.objects.create(tweetID_id=int(retweeted), userID_id=request.user.username)
     
     if request.method == 'POST':
-        if request.POST['delete_user'] == '1':
-            twitteruser.objects.get(username=request.user.username).delete()
-            redirect(login)
         if request.POST['follow'] == '1':
             follower.objects.create(userID_id=user_data, followerID_id=twitteruser.objects.get(username=request.user.username).username)
         if request.POST['follow'] == '2':
             follower.objects.get(userID_id=user_data, followerID_id=twitteruser.objects.get(username=request.user.username)).delete()
-
+        if request.POST['follow'] == '3':
+            logout(request)
+            twitteruser.objects.get(username=user_data).delete()
+            User.objects.get(username=user_data).delete()
+            return redirect(login_page)
+            
     followers = [ i['followerID_id'] for i in list(follower.objects.filter(userID_id=user_data).values('followerID_id'))]
     following = [ i['userID_id'] for i in list(follower.objects.filter(followerID_id=user_data).values('userID_id'))]
             
@@ -139,7 +146,7 @@ def profile(request):
     else:
         already_following = True
         
-    return render(request, 'profile.html', {'user_data': user_data, 'already_following': already_following, 'tweets': sorted_tweets, 'followers': followers, 'following': following, 'view': view}) 
+    return render(request, 'profile.html', {'user_data': user_data, 'already_following': already_following, 'tweets': sorted_tweets, 'followers': followers, 'following': following, 'view': view, 'favorites': favorites, 'retweets': retweets}) 
     
 def logout_view(request):
     logout(request)

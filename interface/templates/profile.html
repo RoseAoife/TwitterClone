@@ -32,7 +32,7 @@
             {% if user_data == request.user.username %}
             <form action="{% url 'profile'%}?user={{ user_data }}" method="post">
                 {% csrf_token %}
-                <button name='delete_user' value='1'>Delete Account</button>
+                <button name='follow' value='3'>Delete Account</button>
             </form>
             <br>
             {% endif %}
@@ -43,7 +43,7 @@
                     <h4>Following:</h4>
                     <ul style="list-style-type: none; padding-right: 40px;">
                         {% for i in following %}
-                        <li><a href="{% url 'profile' %}?user={{ i }}">{{ i }}</a></li>
+                        <li style="word-break: break-all;"><a href="{% url 'profile' %}?user={{ i }}">{{ i }}</a></li>
                         {% endfor %}
                         {% if not following %}
                         <li>Empty...</li>
@@ -54,7 +54,7 @@
                     <h4>Followers:</h4>
                     <ul style="list-style-type: none; padding-right: 40px;">
                         {% for i in followers %}
-                        <li><a href="{% url 'profile' %}?user={{ i }}">{{ i }}</a></li>
+                        <li style="word-break: break-all;"><a href="{% url 'profile' %}?user={{ i }}">{{ i }}</a></li>
                         {% endfor %}
                         {% if not followers %}
                         <li>Empty...</li>
@@ -77,8 +77,8 @@
                         <ul style="list-style-type: none; padding-right: 40px;">
                             {% for i in tweets %}
                             <li style="border: 1px solid black; padding: 5px 0px 5px 0px;">
-                                <p style="display: inline; padding-right: 100%;">&nbsp;{{ i.posterID_id }}</p>
-                                <br>{{ i.Message }}<br>
+                                <p style="display: inline; word-break: break-all;">{{ i.posterID_id }}</p>
+                                <br><p style="word-break: break-all;">{{ i.Message }}</p>
                                 <p style="display: inline; font-size: 10px;">posted: {{ i.PostTime }}</p>
                                 <br>
                                 <p style="display: inline; font-size: 10px;">

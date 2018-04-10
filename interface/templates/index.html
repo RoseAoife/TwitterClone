@@ -16,7 +16,7 @@
                     <form action="{% url 'search'%}" method="post">
                         {% csrf_token %}
                         <h2>Search</h2>
-                        <input type="text" placeholder="Search for other users!" name="search"></input><button>Submit</button>
+                        <input type="text" placeholder="Search for other users!" name="search" maxlength="45"></input><button>Submit</button>
                     </form>
                 <br>
             </div>
@@ -26,7 +26,7 @@
                 <form action="{% url 'index'%}?view={{ view }}" method="post">
                     {% csrf_token %}
                     
-                    <textarea placeholder="Tell the world what you're thinking about..." maxlength="140" name="message" style="resize: none; width: 50%; height: 32px;"></textarea>
+                    <textarea placeholder="Tell the world what you're thinking..." maxlength="140" name="message" style="resize: none; width: 50%; height: 32px;"></textarea>
                     <br>
                     <button name="tweeting" value="1">Submit</button>
                 </form>
@@ -44,15 +44,23 @@
                         <ul style="list-style-type: none; padding-right: 40px;">
                             {% for i in tweets %}
                             <li style="border: 1px solid black; padding: 5px 0px 5px 0px;">
-                                <p style="display: inline; padding-right: 100%;">&nbsp;{{ i.posterID_id }}</p>
-                                <br>{{ i.Message }}<br>
+                                <p style="display: inline; word-break: break-all;">{{ i.posterID_id }}</p>
+                                <br><p style="word-break: break-all;">{{ i.Message }}<p>
                                 <p style="display: inline; font-size: 10px;">posted: {{ i.PostTime }}</p>
                                 <br>
                                 <p style="display: inline; font-size: 10px;">
+                                    {% if i.tweetID not in favorites %}
                                     <a href="{% url 'index' %}?view={{ view }}&favorite={{ i.tweetID }}">Favorite</a> - 
-                                    <a href="{% url 'index' %}?view={{ view }}&retweet={{ i.tweetID }}">Retweet</a><br>
+                                    {% else %}
+                                    <a href="{% url 'index' %}?view={{ view }}&favorite={{ i.tweetID }}">Un-Favorite</a> - 
+                                    {% endif %}
+                                    {% if i.tweetID not in retweets %}
+                                    <a href="{% url 'index' %}?view={{ view }}&retweet={{ i.tweetID }}">Retweet</a>
+                                    {% else %}
+                                    <a href="{% url 'index' %}?view={{ view }}&retweet={{ i.tweetID }}">Un-Retweet</a>
+                                    {% endif %}
                                     {% if i.posterID_id == request.user.username %}
-                                    <a href="{% url 'index' %}?view={{ view }}&deleted={{ i.tweetID }}">Delete</a>
+                                     - <a href="{% url 'index' %}?view={{ view }}&deleted={{ i.tweetID }}">Delete</a>
                                     {% endif %}
                                 </p>
                             </li>

@@ -9,23 +9,27 @@ class twitteruser(models.Model):
     
 class tweet(models.Model):
     tweetID = models.AutoField(primary_key=True)
-    posterID = models.ForeignKey(twitteruser, on_delete=models.DO_NOTHING)
+    posterID = models.ForeignKey(twitteruser, on_delete=models.CASCADE)
     Message = models.CharField(max_length=140)
     PostTime = models.DateTimeField(default=datetime.now, blank=True)
     
 class retweet(models.Model):
-    retweetID = models.AutoField(primary_key=True)
-    userID = models.ForeignKey(twitteruser, on_delete=models.DO_NOTHING)
+    class Meta:
+            unique_together = (('userID', 'tweetID'),)
+            
+    userID = models.ForeignKey(twitteruser, on_delete=models.CASCADE)
     tweetID = models.ForeignKey(tweet, on_delete=models.CASCADE)    
     
 class favorite(models.Model):
-    favoriteID = models.AutoField(primary_key=True)
-    userID = models.ForeignKey(twitteruser, on_delete=models.DO_NOTHING)
+    class Meta:
+            unique_together = (('userID', 'tweetID'),)
+            
+    userID = models.ForeignKey(twitteruser, on_delete=models.CASCADE)
     tweetID = models.ForeignKey(tweet, on_delete=models.CASCADE)
     
 class follower(models.Model):
     class Meta:
         unique_together = (('userID', 'followerID'),)
 
-    userID = models.ForeignKey(twitteruser, related_name="user_name", on_delete=models.DO_NOTHING)
-    followerID = models.ForeignKey(twitteruser, related_name="follower_name", on_delete=models.DO_NOTHING)
+    userID = models.ForeignKey(twitteruser, related_name="user_name", on_delete=models.CASCADE)
+    followerID = models.ForeignKey(twitteruser, related_name="follower_name", on_delete=models.CASCADE)

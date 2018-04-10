@@ -17,7 +17,9 @@
             <div style="width: 80%; max-height: 400px; overflow: auto; overflow-x: hidden;">
                 <ul style="list-style-type: none; padding-right: 40px;">
                     {% for i in user_list %}
-                    <li style="border: 1px solid black; padding: 5px 0px 5px 0px;">{{ i }} - <a href="{% url 'profile' %}?user={{ i }}">View Profile</a></li>
+                    <li style="border: 1px solid black; padding: 5px 0px 5px 0px; word-break: break-all;">{{ i }} - <a href="{% url 'profile' %}?user={{ i }}">View Profile</a></li>
+                    {% empty %}
+                    <li style="border: 1px solid black; padding: 5px 0px 5px 0px; word-break: break-all;">Emtpy...</li>
                     {% endfor %}
                 <ul>
             </div>
