@@ -104,6 +104,29 @@ def search(request):
     return render(request, 'search.html', {'user_list': user_list, 'tweets': tweets}) 
         
 def profile(request):
+    favorited = request.GET.get('favorite')
+    retweeted = request.GET.get('retweet')
+    deleted = request.GET.get('deleted')
+    
+    self_favs = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+    self_ret = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+    
+    if favorited:
+        if int(favorited) not in self_favs:
+            favorite.objects.create(tweetID_id=int(favorited), userID_id=request.user.username)
+        else:
+            favorite.objects.get(tweetID_id=int(favorited), userID_id=request.user.username).delete()
+    if retweeted:
+        if int(retweeted) not in self_ret:
+            retweet.objects.create(tweetID_id=int(retweeted), userID_id=request.user.username)
+        else:
+            retweet.objects.get(tweetID_id=int(retweeted), userID_id=request.user.username).delete()
+    if deleted:
+        tweet.objects.get(tweetID=int(deleted), posterID_id=request.user.username).delete()
+        
+    self_favs = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+    self_ret = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+
     user_data = request.GET.get('user')
     favorites = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=user_data).values('tweetID_id'))]
     retweets = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=user_data).values('tweetID_id'))]
@@ -119,14 +142,6 @@ def profile(request):
     sorted_tweets = [(dict_['PostTime'], dict_) for dict_ in tweets]
     sorted_tweets.sort(reverse=True)
     sorted_tweets = [dict_ for (key, dict_) in sorted_tweets]
-    
-    favorited = request.GET.get('favorite')
-    retweeted = request.GET.get('retweet')
-    
-    if favorited:
-        favorite.objects.create(tweetID_id=int(favorited), userID_id=request.user.username)
-    if retweeted:
-        retweet.objects.create(tweetID_id=int(retweeted), userID_id=request.user.username)
     
     if request.method == 'POST':
         if request.POST['follow'] == '1':
@@ -144,7 +159,7 @@ def profile(request):
     else:
         already_following = True
         
-    return render(request, 'profile.html', {'user_data': user_data, 'already_following': already_following, 'tweets': sorted_tweets, 'followers': followers, 'following': following, 'view': view, 'favorites': favorites, 'retweets': retweets}) 
+    return render(request, 'profile.html', {'user_data': user_data, 'already_following': already_following, 'tweets': sorted_tweets, 'followers': followers, 'following': following, 'view': view, 'favorites': favorites, 'retweets': retweets, 'self_favs': self_favs, 'self_ret': self_ret}) 
     
 def logout_view(request):
     logout(request)

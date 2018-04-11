@@ -116,12 +116,12 @@
                                 <br>
                                 <p style="word-break: break-all; padding: 6px 0px 0px 20px; font-size: 16px;">{{ i.Message }}<p>
                                 <p style="display: inline; font-size: 13px;">
-                                    {% if i.tweetID not in favorites %}
+                                    {% if i.tweetID not in self_favs %}
                                     <a href="{% url 'profile' %}?view={{ view }}&favorite={{ i.tweetID }}&user={{ user_data }}"><span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span></a>
                                     {% else %}
                                     <a href="{% url 'profile' %}?view={{ view }}&favorite={{ i.tweetID }}&user={{ user_data }}"><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></a>
                                     {% endif %}
-                                    {% if i.tweetID not in retweets %}
+                                    {% if i.tweetID not in self_ret %}
                                     <a style="padding-left: 8px;" href="{% url 'profile' %}?view={{ view }}&retweet={{ i.tweetID }}&user={{ user_data }}"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span></a>
                                     {% else %}
                                     <a style="padding-left: 8px;" href="{% url 'profile' %}?view={{ view }}&retweet={{ i.tweetID }}&user={{ user_data }}"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span></a>
