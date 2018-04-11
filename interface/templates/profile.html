@@ -91,7 +91,13 @@
             <div class="panel panel-default center-block" style="width: 50%;">
                 <div class="panel-heading clearfix">
                     <div style="padding-top: 7px;" class="pull-left">
-                    <h3 class="panel-title">{{ user_data }}'s Timeline</h3>
+                    {% if view == 'favorites' %}
+                    <h3 class="panel-title">Favorites</h3>
+                    {% elif view == 'retweets' %}
+                    <h3 class="panel-title">Retweets</h3>
+                    {% else %}
+                    <h3 class="panel-title">Timeline</h3>
+                    {% endif %}
                     </div>
                     <div class="pull-right">
                         <a class="btn btn-primary btn-sm" href="{% url 'profile' %}?user={{ user_data }}&view=all">All</a>

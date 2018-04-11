@@ -4,22 +4,6 @@
     <head>
     
         <title>Twitter Clone</title>
-        
-        <style>
-        #timeline::-webkit-scrollbar-track {
-            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-            border-radius: 10px;
-            background-color: #F5F5F5;}
-            
-        #timeline::-webkit-scrollbar {
-            width: 8px;
-            background-color: #F5F5F5;}
-
-        #timeline::-webkit-scrollbar-thumb {
-            border-radius: 10px;
-            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-            background-color: #555;}
-        </style>
 
     </head>
 
@@ -38,7 +22,7 @@
                     <form action="{% url 'index'%}?view={{ view }}" method="post">
                         {% csrf_token %}
                         <div class="input-group" style="width: 50%; margin: 0 auto;">
-                            <input class="form-control" placeholder="Tell the world what you're thinking..." maxlength="140" name="message" style="resize: none;"></input>
+                            <input autocomplete="off" class="form-control" placeholder="Tell the world what you're thinking..." maxlength="140" name="message" style="resize: none;"></input>
                             <span class="input-group-btn">
                                 <button name="tweeting" value="1" class="btn btn-primary">Submit</button>
                             </span>
@@ -46,13 +30,17 @@
                     </form>
                 </div>
             </div>
-                
-            <br>
             
             <div class="panel panel-default center-block" style="width: 50%;">
                 <div class="panel-heading clearfix">
                     <div style="padding-top: 7px;" class="pull-left">
+                    {% if view == 'favorites' %}
+                    <h3 class="panel-title">Favorites</h3>
+                    {% elif view == 'retweets' %}
+                    <h3 class="panel-title">Retweets</h3>
+                    {% else %}
                     <h3 class="panel-title">Timeline</h3>
+                    {% endif %}
                     </div>
                     <div class="pull-right">
                         <a class="btn btn-primary btn-sm" href="{% url 'index' %}?view=all">All</a>

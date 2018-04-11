@@ -23,9 +23,9 @@
                     {% csrf_token %}
                     
                         
-                        <input class="form-control" placeholder="Username" type="text" name="username" maxlength="45"></input>
+                        <input autocomplete="off" class="form-control" placeholder="Username" type="text" name="username" maxlength="45"></input>
                         <br>
-                        <input class="form-control" placeholder="Password" type="password" name="password"></input>
+                        <input autocomplete="off" class="form-control" placeholder="Password" type="password" name="password"></input>
                         <br>
                         <div class="input-group" style="width: 90%; margin: 0 auto; text-align: center;">
                             {% if error %}

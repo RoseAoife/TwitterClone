@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+    
+        <title>Twitter Clone</title>
+
+    </head>
+
+    <body>
+
+            {% include 'header.html' %}
+            
+            <div class="panel panel-default center-block" style="width: 50%;">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Search</h3>
+                </div>
+              
+                <div class="panel-body">
+                
+                    <div class="panel panel-default center-block" style="width: 90%;">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Users</h3>
+                        </div>
+                      
+                        <div style="max-height: 400px; overflow: auto; overflow-x: hidden;" id="timeline">
+                            {% for i in user_list %}
+                            <div style="padding-left: 20px; border-top:1px solid lightgrey; border-bottom:1px solid lightgrey;">
+                                <div class="panel-body">
+                                    <a href="{% url 'profile' %}?user={{ i }}" style="padding: 5px 0px 5px 0px; word-break: break-all; font-size: 17px;">{{ i }}</a>
+                                    <br>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div style="padding-left: 20px; border-top:1px solid lightgrey; border-bottom:1px solid lightgrey;">
+                                <div class="panel-body">  
+                                    <a style="text-decoration: none; color: black;">Emtpy...</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="panel panel-default center-block" style="width: 90%;">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Tweets</h3>
+                        </div>
+                      
+                        <div style="max-height: 400px; overflow: auto; overflow-x: hidden;" id="timeline">
+                            {% for i in tweets %}
+                            <div style="padding-left: 20px; border-top:1px solid lightgrey; border-bottom:1px solid lightgrey;">
+                                <div class="panel-body">
+                                    <a style="font-size: 17px; color: #6983A0; text-decoration: none; display: inline;" href="{% url 'profile' %}?user={{ i.posterID_id }}">{{ i.posterID_id }}</a>
+                                    <p style="display: inline; font-size: 10px;"> - {{ i.PostTime }}</p>
+                                    <br>
+                                    <p style="word-break: break-all; padding: 6px 0px 0px 20px; font-size: 16px;">{{ i.Message }}<p>
+                                    <p style="display: inline; font-size: 13px;">
+                                        {% if i.tweetID not in favorites %}
+                                        <a href="{% url 'index' %}?view={{ view }}&favorite={{ i.tweetID }}"><span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span></a>
+                                        {% else %}
+                                        <a href="{% url 'index' %}?view={{ view }}&favorite={{ i.tweetID }}"><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></a>
+                                        {% endif %}
+                                        {% if i.tweetID not in retweets %}
+                                        <a style="padding-left: 8px;" href="{% url 'index' %}?view={{ view }}&retweet={{ i.tweetID }}"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span></a>
+                                        {% else %}
+                                        <a style="padding-left: 8px;" href="{% url 'index' %}?view={{ view }}&retweet={{ i.tweetID }}"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span></a>
+                                        {% endif %}
+                                        {% if i.posterID_id == request.user.username %}
+                                        <a style="padding-left: 8px;" href="{% url 'index' %}?view={{ view }}&deleted={{ i.tweetID }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% if not tweets %}
+                            <div style="padding-left: 20px; border-top:1px solid lightgrey; border-bottom:1px solid lightgrey;">
+                                <div class="panel-body">
+                                    <a style="text-decoration: none; color: black;">Empty...</a>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                
+                </div>
+
+            </div>
+    
+    </body>
+
+</html>

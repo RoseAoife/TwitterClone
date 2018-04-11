@@ -23,13 +23,24 @@
                         {% csrf_token %}
                         <div class="input-group" style="width: 50%; margin: 0 auto; text-align: center;">
                             <p style="font-size: 25px;">Change Settings</p>
-                            <input class="form-control" placeholder="Username: {{ request.user.username }}" maxlength="45" name="username"></input>
+                            <label>Username:</label>
+                            <input autocomplete="off" class="form-control" placeholder="{{ request.user.username }}" maxlength="45" name="username"></input>
                             <br><br><br>
-                            <input class="form-control" placeholder="Password" maxlength="45" name="password"></input>
+                            <label>Password:</label>
+                            <input autocomplete="off" class="form-control" placeholder="Password" maxlength="45" name="password"></input>
                         </div>
-                        {{ data }}
                         <br>
                         <div class="input-group" style="width: 50%; margin: 0 auto; text-align: center;">
+                            {% if error %}
+                            <div class="alert alert-danger">
+                                <p>{{ error }}</p>
+                            </div>
+                            {% endif %}
+                            {% if success %}
+                            <div class="alert alert-success">
+                                <p>{{ success }}</p>
+                            </div>
+                            {% endif %}
                             <button name='setting' value='apply' class="btn btn-primary">Apply Settings</button>
                         </div>
                         <hr>

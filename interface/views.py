@@ -100,7 +100,8 @@ def index(request):
 def search(request):
     search_key = request.POST['search']
     user_list = [i['username'] for i in twitteruser.objects.filter(username__icontains=search_key).values('username')]
-    return render(request, 'profile_search.html', {'user_list': user_list}) 
+    tweets = [i for i in tweet.objects.filter(Message__icontains=search_key)]
+    return render(request, 'search.html', {'user_list': user_list, 'tweets': tweets}) 
         
 def profile(request):
     user_data = request.GET.get('user')
@@ -151,36 +152,40 @@ def logout_view(request):
     
 def settings(request):
     user_data = request.user.username
+    data = ''
+    success = ''
     
     if request.method == 'POST':
         if request.POST['setting'] == 'apply':
-            username = request.POST['username']
-            password = request.POST['password']
-            if username:
-                if username != request.user.username:
-                    try:
-                        user = User.objects.get(username=username)
-                        return render(request, 'settings.html', {'error': 'Username Already Taken'} )
-                    except User.DoesNotExist:
-                        try:
-                            user2 = twitteruser.objects.get(username=username)
-                            return render(request, 'settings.html', {'error': 'Username Already Taken'} )
-                        except twitteruser.DoesNotExist:
-                            User.objects.get(username=user_data).username = username
-                            twitteruser.objects.get(username=user_data).username = username
-                            if password:
-                                User.objects.get(username=username).set_password(password)
-                                twitteruser.objects.get(username=username).password = password
-                                
-                        
-            elif password:
-                User.objects.get(username=user_data).set_password(password)
-                twitteruser.objects.get(username=user_data).password = password
+        
+            # username = request.POST['username']
+            # password = request.POST['password']
+            
+            # if password:
+                # User.objects.get(username=user_data).set_password(password)
+                # twitteruser.objects.get(username=user_data).password = password
+                # success = 'Password Changed '
                 
+            # if username:
+                # if username != request.user.username:
+                    # try:
+                        # User.objects.get(username=username)
+                        # return render(request, 'settings.html', {'error': 'Username Already Taken'} )
+                    # except User.DoesNotExist:
+                        # try:
+                            # twitteruser.objects.get(username=username)
+                            # success += 'Username Changed'
+                            # User.objects.get(username=user_data).username = username
+                            # twitteruser.objects.get(username=user_data).username = username  
+                        # except twitteruser.DoesNotExist:
+                            # return render(request, 'settings.html', {'error': 'Username Already Taken', 'success': success} )
+                            
+            return render(request, 'settings.html', {'success': 'Settings Applied'} )
+
         elif request.POST['setting'] == 'delete':
             logout(request)
             twitteruser.objects.get(username=user_data).delete()
             User.objects.get(username=user_data).delete()
             return redirect(login_page)
-            
-    return render(request, 'settings.html')
+        
+    return render(request, 'settings.html', {'success': success})
