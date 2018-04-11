@@ -204,3 +204,10 @@ def settings(request):
             return redirect(login_page)
         
     return render(request, 'settings.html', {'success': success})
+    
+def handler404(request):
+    return render(request.build_absolute_uri().rsplit('/', 1)[0] + '/')
+
+
+def handler500(request):
+    return render(request.build_absolute_uri().rsplit('/', 1)[0] + '/')

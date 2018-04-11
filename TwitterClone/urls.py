@@ -20,3 +20,6 @@ from django.conf.urls import url, include
 urlpatterns = [
     url(r'', include('interface.urls')),
 ]
+
+handler404 = 'interface.views.handler404'
+handler500 = 'interface.views.handler500'

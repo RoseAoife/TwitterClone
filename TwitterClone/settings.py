@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '$y%!&8g*i^3-48e@y#anv$r4wlz6zqbs7tp5b__=_tx0&mgf4&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -51,6 +51,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'TwitterClone.urls'
+
+SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
+
+STATICFILES_DIRS = (
+  os.path.join(SITE_ROOT, 'static/'),
+)
 
 TEMPLATES = [
     {
