@@ -3,8 +3,6 @@ from datetime import datetime
 
 class twitteruser(models.Model):
     username = models.CharField(max_length=45, primary_key=True)
-    FirstName = models.CharField(max_length=45)
-    LastName = models.CharField(max_length=45)
     password = models.CharField(max_length=45)
     
 class tweet(models.Model):

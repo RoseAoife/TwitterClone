@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+    
+        <title>Twitter Clone</title>
+
+    </head>
+
+    <body>
+    
+        <div>
+            
+            {% include 'header.html' %}
+            
+            <div class="panel panel-default center-block" style="width: 50%;">
+              <div class="panel-heading">
+                <h3 class="panel-title">{{ request.user.username }}'s Settings</h3>
+              </div>
+              
+                <div class="panel-body">
+                    <form action="{% url 'settings'%}" method="post">
+                        {% csrf_token %}
+                        <div class="input-group" style="width: 50%; margin: 0 auto; text-align: center;">
+                            <p style="font-size: 25px;">Change Settings</p>
+                            <input class="form-control" placeholder="Username: {{ request.user.username }}" maxlength="45" name="username"></input>
+                            <br><br><br>
+                            <input class="form-control" placeholder="Password" maxlength="45" name="password"></input>
+                        </div>
+                        {{ data }}
+                        <br>
+                        <div class="input-group" style="width: 50%; margin: 0 auto; text-align: center;">
+                            <button name='setting' value='apply' class="btn btn-primary">Apply Settings</button>
+                        </div>
+                        <hr>
+                        <div class="input-group" style="width: 50%; margin: 0 auto; text-align: center;">
+                            <button onclick="deleteUser()" type="button" class="btn btn-danger">Delete Account</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div id="popup" class="alert alert-danger panel panel-default" style="visibility: hidden; position: fixed; width: 300px; top: 50%; left: 50%; margin-top: -100px; margin-left: -150px;">
+                <div class="panel-body">
+                    <form action="{% url 'settings'%}" method="post">
+                        {% csrf_token %}
+                        <div class="input-group" style="width: 100%; margin: 0 auto; text-align: center;">
+                            <p style="font-size: 25px;">Are you sure?</p>
+                         </div>
+                        <div class="input-group" style="width: 50%; margin: 0 auto; text-align: center;">
+                            <button name='setting' value='delete' class="btn btn-danger">Yes</button>&nbsp;
+                            &nbsp;<a onclick="removePop()" class="btn btn-primary">No</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        
+        </div>
+    
+    </body>
+
+</html>

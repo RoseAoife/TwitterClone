@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -8,41 +9,38 @@
 
     <body>
 
-        <center>
-    
-            <h1>Twitter Clone Signup</h1>
+        <div>   
+            {% include 'header.html' %}
             
-            <form action="{% url 'signup'%}" method="post">
-            {% csrf_token %}
+            <div class="panel panel-default center-block" style="width: 30%;">
+              <div class="panel-heading">
+                <h3 class="panel-title">Sign-up</h3>
+              </div>
+              
+              <div class="panel-body">
             
-                <div>
+                <form action="{% url 'signup'%}" method="post">
+                {% csrf_token %}
                 
-                    <p>First Name: <input type="text" name="firstname"></input></p>
-                    <p>Last Name: <input type="text" name="lastname"></input></p>
-                    
+                    <input class="form-control" type="text" name="username" maxlength="45" placeholder="Username"></input>
                     <br>
-                    
-                    <p>Username: <input type="text" name="username" maxlength="45"></input></p>
-                    <p>Password: <input type="password" name="password"></input></p>
-                    <p>Confirm Password: <input type="password" name="password2"></input></p>
-                    <button type="submit">Signup</button>
-                
-                </div>
-                
-                <br>
-                
-                <a href="{% url 'login_page' %}">Back</a>
-                
-                {% if error %}
-                    <div>
-                        <p>{{ error }}</p>
+                    <input class="form-control" type="password" name="password" placeholder="Password"></input>
+                    <br>
+                    <input class="form-control" type="password" name="password2" placeholder="Confirm Password"></input>
+                    <br>
+                    <div class="input-group" style="width: 90%; margin: 0 auto; text-align: center;">
+                        {% if error %}
+                        <div class="alert alert-danger">
+                            <p>{{ error }}</p>
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary">Signup</button>
+                        <br><br>
+                        <a href="{% url 'login_page' %}" class="btn btn-default btn-sm">Back</a>
                     </div>
-                {% endif %}
-            
-            </form>
-        
-        </center>
-    
+                
+                </form>
+            </div>
     </body>
 
 </html>

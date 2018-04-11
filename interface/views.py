@@ -23,24 +23,24 @@ def login_page(request):
                 login(request, user)
                 return redirect(index)
             else:
-                error = "username or password incorrect"
+                error = "Username/Password Incorrect"
                 return render(request, 'login.html', {'error': error})
         else:
             return render(request, 'login.html')
         
 def signup(request):
     if request.method == 'POST':
-        if request.POST['password'] == '' or request.POST['password2'] == '' or request.POST['username'] == '' or request.POST['firstname'] == '' or request.POST['lastname'] == '':
+        if request.POST['password'] == '' or request.POST['password2'] == '' or request.POST['username'] == '':
             return render(request, 'signup.html', {'error': 'Leave no fields empty'} )
         else:
             if request.POST['password'] == request.POST['password2']:
                 try:
-                    user = User.objects.get(username=request.POST['username'])
+                    User.objects.get(username=request.POST['username'])
                     return render(request, 'signup.html', {'error': 'Username Already Taken'} )
                 except User.DoesNotExist:
                     User.objects.create_user(request.POST['username'], password=request.POST['password'])
-                    twitteruser.objects.create(username=request.POST['username'], FirstName=request.POST['firstname'], LastName=request.POST['lastname'], password=request.POST['password'])
-                    return render(request, 'Login.html', {'error': 'Account Created'} )
+                    twitteruser.objects.create(username=request.POST['username'], password=request.POST['password'])
+                    return render(request, 'Login.html', {'success': 'Account Created'} )
             else:
                 return render(request, 'signup.html', {'error': 'Passwords Did\'t Match'})
     else:
@@ -87,6 +87,8 @@ def index(request):
         sorted_tweets = [dict_ for (key, dict_) in sorted_tweets]
         
         if request.method == 'POST':
+            if request.POST['message'] == "":
+                return redirect(index)
             tweet.objects.create(posterID_id=current_user.username, Message=request.POST['message'], PostTime=datetime.datetime.now())
             return redirect(index)
             
@@ -130,11 +132,6 @@ def profile(request):
             follower.objects.create(userID_id=user_data, followerID_id=twitteruser.objects.get(username=request.user.username).username)
         if request.POST['follow'] == '2':
             follower.objects.get(userID_id=user_data, followerID_id=twitteruser.objects.get(username=request.user.username)).delete()
-        if request.POST['follow'] == '3':
-            logout(request)
-            twitteruser.objects.get(username=user_data).delete()
-            User.objects.get(username=user_data).delete()
-            return redirect(login_page)
             
     followers = [ i['followerID_id'] for i in list(follower.objects.filter(userID_id=user_data).values('followerID_id'))]
     following = [ i['userID_id'] for i in list(follower.objects.filter(followerID_id=user_data).values('userID_id'))]
@@ -150,4 +147,40 @@ def profile(request):
     
 def logout_view(request):
     logout(request)
-    return render(request, 'login.html') 
+    return render(request, 'login.html')
+    
+def settings(request):
+    user_data = request.user.username
+    
+    if request.method == 'POST':
+        if request.POST['setting'] == 'apply':
+            username = request.POST['username']
+            password = request.POST['password']
+            if username:
+                if username != request.user.username:
+                    try:
+                        user = User.objects.get(username=username)
+                        return render(request, 'settings.html', {'error': 'Username Already Taken'} )
+                    except User.DoesNotExist:
+                        try:
+                            user2 = twitteruser.objects.get(username=username)
+                            return render(request, 'settings.html', {'error': 'Username Already Taken'} )
+                        except twitteruser.DoesNotExist:
+                            User.objects.get(username=user_data).username = username
+                            twitteruser.objects.get(username=user_data).username = username
+                            if password:
+                                User.objects.get(username=username).set_password(password)
+                                twitteruser.objects.get(username=username).password = password
+                                
+                        
+            elif password:
+                User.objects.get(username=user_data).set_password(password)
+                twitteruser.objects.get(username=user_data).password = password
+                
+        elif request.POST['setting'] == 'delete':
+            logout(request)
+            twitteruser.objects.get(username=user_data).delete()
+            User.objects.get(username=user_data).delete()
+            return redirect(login_page)
+            
+    return render(request, 'settings.html')

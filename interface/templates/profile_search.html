@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -12,16 +13,27 @@
 
             {% include 'header.html' %}
             
-            <p>Profile Search</p>
-            
-            <div style="width: 80%; max-height: 400px; overflow: auto; overflow-x: hidden;">
-                <ul style="list-style-type: none; padding-right: 40px;">
+            <div class="panel panel-default center-block" style="width: 50%;">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Search</h3>
+                </div>
+              
+                <div max-height: 400px; overflow: auto; overflow-x: hidden; index="timeline">
                     {% for i in user_list %}
-                    <li style="border: 1px solid black; padding: 5px 0px 5px 0px; word-break: break-all;">{{ i }} - <a href="{% url 'profile' %}?user={{ i }}">View Profile</a></li>
+                    <div style="padding-left: 20px; border-top:1px solid lightgrey; border-bottom:1px solid lightgrey;">
+                        <div class="panel-body">
+                            <a href="{% url 'profile' %}?user={{ i }}" style="padding: 5px 0px 5px 0px; word-break: break-all; font-size: 17px;">{{ i }}<a>
+                            <br>
+                        </div>
+                    </div>
                     {% empty %}
-                    <li style="border: 1px solid black; padding: 5px 0px 5px 0px; word-break: break-all;">Emtpy...</li>
+                    <div style="padding-left: 20px; border-top:1px solid lightgrey; border-bottom:1px solid lightgrey;">
+                        <div class="panel-body">  
+                            <a style="text-decoration: none; color: black;">Emtpy...</a>
+                        </div>
+                    </div>
                     {% endfor %}
-                <ul>
+                </div>
             </div>
         
         </center>
