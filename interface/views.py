@@ -28,7 +28,7 @@ def login_page(request):
         else:
             return render(request, 'login.html')
         
-def signup(request):
+def signup(request):    
     if request.method == 'POST':
         if request.POST['password'] == '' or request.POST['password2'] == '' or request.POST['username'] == '':
             return render(request, 'signup.html', {'error': 'Leave no fields empty'} )
@@ -42,7 +42,7 @@ def signup(request):
                     twitteruser.objects.create(username=request.POST['username'], password=request.POST['password'])
                     return render(request, 'Login.html', {'success': 'Account Created'} )
             else:
-                return render(request, 'signup.html', {'error': 'Passwords Did\'t Match'})
+                return render(request, 'signup.html', {'error': 'Passwords Didn\'t Match'})
     else:
         return render(request, 'signup.html')
         
@@ -80,7 +80,14 @@ def index(request):
         elif view == 'retweets':
             tweets = list(tweet.objects.filter(tweetID__in=retweets).values())
         else:
-            tweets = list(tweet.objects.filter(posterID_id__in=following).values())    
+            tweets = list(tweet.objects.filter(posterID_id__in=following).values())
+            print(tweets)
+            rtweets = list(tweet.objects.filter(tweetID__in=retweets).values())
+            for i in rtweets:
+                if not any(j['tweetID'] == i['tweetID'] for j in tweets):
+                    tweets.append(i.copy())
+
+            print(tweets)
 
         sorted_tweets = [(dict_['PostTime'], dict_) for dict_ in tweets]
         sorted_tweets.sort(reverse=True)
@@ -97,11 +104,36 @@ def index(request):
     else:
         return render(request, 'login.html') 
         
-def search(request):
-    search_key = request.POST['search']
+def search(request):  
+    favorited = request.GET.get('favorite')
+    retweeted = request.GET.get('retweet')
+    deleted = request.GET.get('deleted')
+    
+    favorites = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+    retweets = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+  
+    if favorited:
+            if int(favorited) not in favorites:
+                favorite.objects.create(tweetID_id=int(favorited), userID_id=request.user.username)
+            else:
+                favorite.objects.get(tweetID_id=int(favorited), userID_id=request.user.username).delete()
+            return redirect(search)
+    if retweeted:
+        if int(retweeted) not in retweets:
+            retweet.objects.create(tweetID_id=int(retweeted), userID_id=request.user.username)
+        else:
+            retweet.objects.get(tweetID_id=int(retweeted), userID_id=request.user.username).delete()
+        return redirect(search)
+    if deleted:
+        tweet.objects.get(tweetID=int(deleted), posterID_id=request.user.username).delete()
+        return redirect(search)
+        
+    favorites = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+    retweets = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+    
     user_list = [i['username'] for i in twitteruser.objects.filter(username__icontains=search_key).values('username')]
     tweets = [i for i in tweet.objects.filter(Message__icontains=search_key)]
-    return render(request, 'search.html', {'user_list': user_list, 'tweets': tweets}) 
+    return render(request, 'search.html', {'user_list': user_list, 'tweets': tweets, 'retweets': retweets, 'favorites': favorites, 'search_key': search_key}) 
         
 def profile(request):
     favorited = request.GET.get('favorite')
@@ -116,18 +148,25 @@ def profile(request):
             favorite.objects.create(tweetID_id=int(favorited), userID_id=request.user.username)
         else:
             favorite.objects.get(tweetID_id=int(favorited), userID_id=request.user.username).delete()
+        return redirect(profile)
     if retweeted:
         if int(retweeted) not in self_ret:
             retweet.objects.create(tweetID_id=int(retweeted), userID_id=request.user.username)
         else:
             retweet.objects.get(tweetID_id=int(retweeted), userID_id=request.user.username).delete()
+        return redirect(profile)
     if deleted:
-        tweet.objects.get(tweetID=int(deleted), posterID_id=request.user.username).delete()
+        try:
+            tweet.objects.get(tweetID=int(deleted), posterID_id=request.user.username).delete()
+        except:
+            pass
+        return redirect(profile)
         
     self_favs = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
     self_ret = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
 
     user_data = request.GET.get('user')
+
     favorites = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=user_data).values('tweetID_id'))]
     retweets = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=user_data).values('tweetID_id'))]
     
@@ -158,44 +197,45 @@ def profile(request):
         already_following = None
     else:
         already_following = True
+      
+    try:
+        data = request.POST['user']
+    except:
+        data = 'No Post Data'
         
-    return render(request, 'profile.html', {'user_data': user_data, 'already_following': already_following, 'tweets': sorted_tweets, 'followers': followers, 'following': following, 'view': view, 'favorites': favorites, 'retweets': retweets, 'self_favs': self_favs, 'self_ret': self_ret}) 
+    return render(request, 'profile.html', {'data': data, 'user_data': user_data, 'already_following': already_following, 'tweets': sorted_tweets, 'followers': followers, 'following': following, 'view': view, 'favorites': favorites, 'retweets': retweets, 'self_favs': self_favs, 'self_ret': self_ret}) 
     
 def logout_view(request):
     logout(request)
     return render(request, 'login.html')
     
 def settings(request):
-    user_data = request.user.username
-    data = ''
-    success = ''
-    
     if request.method == 'POST':
         if request.POST['setting'] == 'apply':
         
-            # username = request.POST['username']
-            # password = request.POST['password']
+            password = request.POST['password']
+            username = request.user.username
             
-            # if password:
-                # User.objects.get(username=user_data).set_password(password)
-                # twitteruser.objects.get(username=user_data).password = password
-                # success = 'Password Changed '
+            if password:
+                print('setting password as {}'.format(password))
+                current_user = User.objects.get(username=request.user.username)
+                current_twittertwitteruser = twitteruser.objects.get(username=request.user.username)
                 
-            # if username:
-                # if username != request.user.username:
-                    # try:
-                        # User.objects.get(username=username)
-                        # return render(request, 'settings.html', {'error': 'Username Already Taken'} )
-                    # except User.DoesNotExist:
-                        # try:
-                            # twitteruser.objects.get(username=username)
-                            # success += 'Username Changed'
-                            # User.objects.get(username=user_data).username = username
-                            # twitteruser.objects.get(username=user_data).username = username  
-                        # except twitteruser.DoesNotExist:
-                            # return render(request, 'settings.html', {'error': 'Username Already Taken', 'success': success} )
+                current_user.set_password(password)
+                current_twittertwitteruser.Password = password
+                
+                current_user.save()
+                current_twittertwitteruser.save()
+                
+                user = authenticate(request, username=username, password=password)
+                if user is not None:
+                    login(request, user)
+                    return redirect(settings)
+                else:
+                    error = "Username/Password Incorrect"
+                    return render(request, 'login.html', {'error': error})
                             
-            return render(request, 'settings.html', {'success': 'Settings Applied'} )
+            return redirect(settings)
 
         elif request.POST['setting'] == 'delete':
             logout(request)
@@ -203,7 +243,7 @@ def settings(request):
             User.objects.get(username=user_data).delete()
             return redirect(login_page)
         
-    return render(request, 'settings.html', {'success': success})
+    return render(request, 'settings.html')
     
 def handler404(request):
     return render(request.build_absolute_uri().rsplit('/', 1)[0] + '/')

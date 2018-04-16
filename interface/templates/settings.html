@@ -23,9 +23,6 @@
                         {% csrf_token %}
                         <div class="input-group" style="width: 50%; margin: 0 auto; text-align: center;">
                             <p style="font-size: 25px;">Change Settings</p>
-                            <label>Username:</label>
-                            <input autocomplete="off" class="form-control" placeholder="{{ request.user.username }}" maxlength="45" name="username"></input>
-                            <br><br><br>
                             <label>Password:</label>
                             <input autocomplete="off" class="form-control" placeholder="Password" maxlength="45" name="password"></input>
                         </div>

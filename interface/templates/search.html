@@ -56,17 +56,17 @@
                                     <p style="word-break: break-all; padding: 6px 0px 0px 20px; font-size: 16px;">{{ i.Message }}<p>
                                     <p style="display: inline; font-size: 13px;">
                                         {% if i.tweetID not in favorites %}
-                                        <a href="{% url 'index' %}?view={{ view }}&favorite={{ i.tweetID }}"><span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span></a>
+                                        <a href="{% url 'search' %}?search={{ search_key }}&favorite={{ i.tweetID }}"><span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span></a>
                                         {% else %}
-                                        <a href="{% url 'index' %}?view={{ view }}&favorite={{ i.tweetID }}"><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></a>
+                                        <a href="{% url 'search' %}?search={{ search_key }}&favorite={{ i.tweetID }}"><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></a>
                                         {% endif %}
                                         {% if i.tweetID not in retweets %}
-                                        <a style="padding-left: 8px;" href="{% url 'index' %}?view={{ view }}&retweet={{ i.tweetID }}"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span></a>
+                                        <a style="padding-left: 8px;" href="{% url 'search' %}?search={{ search_key }}&retweet={{ i.tweetID }}"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span></a>
                                         {% else %}
-                                        <a style="padding-left: 8px;" href="{% url 'index' %}?view={{ view }}&retweet={{ i.tweetID }}"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span></a>
+                                        <a style="padding-left: 8px;" href="{% url 'search' %}?search={{ search_key }}&retweet={{ i.tweetID }}"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span></a>
                                         {% endif %}
                                         {% if i.posterID_id == request.user.username %}
-                                        <a style="padding-left: 8px;" href="{% url 'index' %}?view={{ view }}&deleted={{ i.tweetID }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+                                        <a style="padding-left: 8px;" href="{% url 'search' %}?search={{ search_key }}&deleted={{ i.tweetID }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
                                         {% endif %}
                                     </p>
                                 </div>
