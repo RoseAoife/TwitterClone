@@ -40,7 +40,7 @@ def signup(request):
                 except User.DoesNotExist:
                     User.objects.create_user(request.POST['username'], password=request.POST['password'])
                     twitteruser.objects.create(username=request.POST['username'], password=request.POST['password'])
-                    return render(request, 'Login.html', {'success': 'Account Created'} )
+                    return render(request, 'login.html', {'success': 'Account Created'} )
             else:
                 return render(request, 'signup.html', {'error': 'Passwords Didn\'t Match'})
     else:
@@ -81,13 +81,10 @@ def index(request):
             tweets = list(tweet.objects.filter(tweetID__in=retweets).values())
         else:
             tweets = list(tweet.objects.filter(posterID_id__in=following).values())
-            print(tweets)
             rtweets = list(tweet.objects.filter(tweetID__in=retweets).values())
             for i in rtweets:
                 if not any(j['tweetID'] == i['tweetID'] for j in tweets):
                     tweets.append(i.copy())
-
-            print(tweets)
 
         sorted_tweets = [(dict_['PostTime'], dict_) for dict_ in tweets]
         sorted_tweets.sort(reverse=True)
@@ -102,148 +99,184 @@ def index(request):
         else:
             return render(request, 'index.html', {'tweets': sorted_tweets, 'view': view, 'favorites': favorites, 'retweets': retweets})
     else:
-        return render(request, 'login.html') 
+        return redirect(login_page) 
         
 def search(request):  
-    favorited = request.GET.get('favorite')
-    retweeted = request.GET.get('retweet')
-    deleted = request.GET.get('deleted')
+    if request.user.is_authenticated:
+
+        try:
+            search_key = request.POST['search']
+        except:
+            search_key = request.GET.get('search_key')
+            if search_key is None:
+                search_key = ''
     
-    favorites = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
-    retweets = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
-  
-    if favorited:
-            if int(favorited) not in favorites:
+        favorited = request.GET.get('favorite')
+        retweeted = request.GET.get('retweet')
+        deleted = request.GET.get('deleted')
+        
+        self_favs = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+        self_ret = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+        
+        if favorited:
+            if int(favorited) not in self_favs:
                 favorite.objects.create(tweetID_id=int(favorited), userID_id=request.user.username)
             else:
                 favorite.objects.get(tweetID_id=int(favorited), userID_id=request.user.username).delete()
-            return redirect(search)
-    if retweeted:
-        if int(retweeted) not in retweets:
-            retweet.objects.create(tweetID_id=int(retweeted), userID_id=request.user.username)
-        else:
-            retweet.objects.get(tweetID_id=int(retweeted), userID_id=request.user.username).delete()
-        return redirect(search)
-    if deleted:
-        tweet.objects.get(tweetID=int(deleted), posterID_id=request.user.username).delete()
-        return redirect(search)
+        if retweeted:
+            if int(retweeted) not in self_ret:
+                retweet.objects.create(tweetID_id=int(retweeted), userID_id=request.user.username)
+            else:
+                retweet.objects.get(tweetID_id=int(retweeted), userID_id=request.user.username).delete()
+        if deleted:
+            try:
+                tweet.objects.get(tweetID=int(deleted), posterID_id=request.user.username).delete()
+            except:
+                pass
+            
+        self_favs = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+        self_ret = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+            
+        favorites = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+        retweets = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+            
+        user_list = [i['username'] for i in twitteruser.objects.filter(username__icontains=search_key).values('username')]
+        tweets = [i for i in tweet.objects.filter(Message__icontains=search_key).values()]
         
-    favorites = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
-    retweets = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
-    
-    user_list = [i['username'] for i in twitteruser.objects.filter(username__icontains=search_key).values('username')]
-    tweets = [i for i in tweet.objects.filter(Message__icontains=search_key)]
-    return render(request, 'search.html', {'user_list': user_list, 'tweets': tweets, 'retweets': retweets, 'favorites': favorites, 'search_key': search_key}) 
+        sorted_tweets = [(dict_['PostTime'], dict_) for dict_ in tweets]
+        sorted_tweets.sort(reverse=True)
+        sorted_tweets = [dict_ for (key, dict_) in sorted_tweets]
+        
+        return render(request, 'search.html', {'data': request.POST, 'user_list': user_list, 'tweets': sorted_tweets, 'retweets': retweets, 'favorites': favorites, 'search_key': search_key}) 
+        
+    else:
+        return redirect(login)
         
 def profile(request):
-    favorited = request.GET.get('favorite')
-    retweeted = request.GET.get('retweet')
-    deleted = request.GET.get('deleted')
-    
-    self_favs = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
-    self_ret = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
-    
-    if favorited:
-        if int(favorited) not in self_favs:
-            favorite.objects.create(tweetID_id=int(favorited), userID_id=request.user.username)
+    if request.user.is_authenticated:
+
+        favorited = request.GET.get('favorite')
+        retweeted = request.GET.get('retweet')
+        deleted = request.GET.get('deleted')
+        
+        self_favs = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+        self_ret = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+        
+        if favorited:
+            if int(favorited) not in self_favs:
+                favorite.objects.create(tweetID_id=int(favorited), userID_id=request.user.username)
+            else:
+                favorite.objects.get(tweetID_id=int(favorited), userID_id=request.user.username).delete()
+        if retweeted:
+            if int(retweeted) not in self_ret:
+                retweet.objects.create(tweetID_id=int(retweeted), userID_id=request.user.username)
+            else:
+                retweet.objects.get(tweetID_id=int(retweeted), userID_id=request.user.username).delete()
+        if deleted:
+            try:
+                tweet.objects.get(tweetID=int(deleted), posterID_id=request.user.username).delete()
+            except:
+                pass
+            
+        self_favs = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+        self_ret = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
+
+        user_data = request.GET.get('user')
+
+        favorites = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=user_data).values('tweetID_id'))]
+        retweets = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=user_data).values('tweetID_id'))]
+        
+        view = request.GET.get('view')
+        if view == 'favorites':
+            tweets = list(tweet.objects.filter(tweetID__in=favorites).values())
+        elif view == 'retweets':
+            tweets = list(tweet.objects.filter(tweetID__in=retweets).values())
         else:
-            favorite.objects.get(tweetID_id=int(favorited), userID_id=request.user.username).delete()
-        return redirect(profile)
-    if retweeted:
-        if int(retweeted) not in self_ret:
-            retweet.objects.create(tweetID_id=int(retweeted), userID_id=request.user.username)
+            tweets = tweet.objects.filter(posterID_id=user_data).values()
+        
+        sorted_tweets = [(dict_['PostTime'], dict_) for dict_ in tweets]
+        sorted_tweets.sort(reverse=True)
+        sorted_tweets = [dict_ for (key, dict_) in sorted_tweets]
+        
+        if request.method == 'POST':
+            try:
+                if request.POST['follow'] == '1':
+                    follower.objects.create(userID_id=user_data, followerID_id=twitteruser.objects.get(username=request.user.username).username)
+                if request.POST['follow'] == '2':
+                    follower.objects.get(userID_id=user_data, followerID_id=twitteruser.objects.get(username=request.user.username)).delete()
+            except:
+                pass
+                
+        followers = [ i['followerID_id'] for i in list(follower.objects.filter(userID_id=user_data).values('followerID_id'))]
+        following = [ i['userID_id'] for i in list(follower.objects.filter(followerID_id=user_data).values('userID_id'))]
+                
+        if user_data not in [i['userID_id'] for i in list(follower.objects.filter(followerID_id=request.user.username).values('userID_id'))] and user_data != request.user.username:
+            already_following = False
+        elif user_data in [i['userID_id'] for i in list(follower.objects.filter(followerID_id=request.user.username).values('userID_id'))]:
+            already_following = None
         else:
-            retweet.objects.get(tweetID_id=int(retweeted), userID_id=request.user.username).delete()
-        return redirect(profile)
-    if deleted:
+            already_following = True
+          
         try:
-            tweet.objects.get(tweetID=int(deleted), posterID_id=request.user.username).delete()
+            data = request.POST['user']
         except:
-            pass
-        return redirect(profile)
-        
-    self_favs = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
-    self_ret = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=request.user.username).values('tweetID_id'))]
-
-    user_data = request.GET.get('user')
-
-    favorites = [i['tweetID_id'] for i in list(favorite.objects.filter(userID_id=user_data).values('tweetID_id'))]
-    retweets = [i['tweetID_id'] for i in list(retweet.objects.filter(userID_id=user_data).values('tweetID_id'))]
-    
-    view = request.GET.get('view')
-    if view == 'favorites':
-        tweets = list(tweet.objects.filter(tweetID__in=favorites).values())
-    elif view == 'retweets':
-        tweets = list(tweet.objects.filter(tweetID__in=retweets).values())
-    else:
-        tweets = tweet.objects.filter(posterID_id=user_data).values()
-    
-    sorted_tweets = [(dict_['PostTime'], dict_) for dict_ in tweets]
-    sorted_tweets.sort(reverse=True)
-    sorted_tweets = [dict_ for (key, dict_) in sorted_tweets]
-    
-    if request.method == 'POST':
-        if request.POST['follow'] == '1':
-            follower.objects.create(userID_id=user_data, followerID_id=twitteruser.objects.get(username=request.user.username).username)
-        if request.POST['follow'] == '2':
-            follower.objects.get(userID_id=user_data, followerID_id=twitteruser.objects.get(username=request.user.username)).delete()
+            data = 'No Post Data'
             
-    followers = [ i['followerID_id'] for i in list(follower.objects.filter(userID_id=user_data).values('followerID_id'))]
-    following = [ i['userID_id'] for i in list(follower.objects.filter(followerID_id=user_data).values('userID_id'))]
-            
-    if user_data not in [i['userID_id'] for i in list(follower.objects.filter(followerID_id=request.user.username).values('userID_id'))] and user_data != request.user.username:
-        already_following = False
-    elif user_data in [i['userID_id'] for i in list(follower.objects.filter(followerID_id=request.user.username).values('userID_id'))]:
-        already_following = None
-    else:
-        already_following = True
-      
-    try:
-        data = request.POST['user']
-    except:
-        data = 'No Post Data'
-        
-    return render(request, 'profile.html', {'data': data, 'user_data': user_data, 'already_following': already_following, 'tweets': sorted_tweets, 'followers': followers, 'following': following, 'view': view, 'favorites': favorites, 'retweets': retweets, 'self_favs': self_favs, 'self_ret': self_ret}) 
+        return render(request, 'profile.html', {'data': data, 'user_data': user_data, 'already_following': already_following, 'tweets': sorted_tweets, 'followers': followers, 'following': following, 'view': view, 'favorites': favorites, 'retweets': retweets, 'self_favs': self_favs, 'self_ret': self_ret}) 
     
+    else:
+        return redirect(login)
+  
 def logout_view(request):
-    logout(request)
-    return render(request, 'login.html')
+    if request.user.is_authenticated:
+        logout(request)
+        return render(request, 'login.html')
+        
+    else:
+        return redirect(login)
     
 def settings(request):
-    if request.method == 'POST':
-        if request.POST['setting'] == 'apply':
+    if request.user.is_authenticated:
+
+        if request.method == 'POST':
         
-            password = request.POST['password']
             username = request.user.username
             
-            if password:
-                print('setting password as {}'.format(password))
-                current_user = User.objects.get(username=request.user.username)
-                current_twittertwitteruser = twitteruser.objects.get(username=request.user.username)
+            if request.POST['setting'] == 'apply':
+            
+                password = request.POST['password']
                 
-                current_user.set_password(password)
-                current_twittertwitteruser.Password = password
-                
-                current_user.save()
-                current_twittertwitteruser.save()
-                
-                user = authenticate(request, username=username, password=password)
-                if user is not None:
-                    login(request, user)
-                    return redirect(settings)
-                else:
-                    error = "Username/Password Incorrect"
-                    return render(request, 'login.html', {'error': error})
-                            
-            return redirect(settings)
+                if password:
+                    current_user = User.objects.get(username=request.user.username)
+                    current_twittertwitteruser = twitteruser.objects.get(username=request.user.username)
+                    
+                    current_user.set_password(password)
+                    current_twittertwitteruser.Password = password
+                    
+                    current_user.save()
+                    current_twittertwitteruser.save()
+                    
+                    user = authenticate(request, username=username, password=password)
+                    if user is not None:
+                        login(request, user)
+                        return redirect(settings)
+                    else:
+                        error = "Username/Password Incorrect"
+                        return render(request, 'login.html', {'error': error})
+                                
+                return redirect(settings)
 
-        elif request.POST['setting'] == 'delete':
-            logout(request)
-            twitteruser.objects.get(username=user_data).delete()
-            User.objects.get(username=user_data).delete()
-            return redirect(login_page)
-        
-    return render(request, 'settings.html')
+            elif request.POST['setting'] == 'delete':
+                logout(request)
+                twitteruser.objects.get(username=username).delete()
+                User.objects.get(username=username).delete()
+                return redirect(login_page)
+            
+        return render(request, 'settings.html')
+    
+    else:
+
+        return redirect(login)
     
 def handler404(request):
     return render(request.build_absolute_uri().rsplit('/', 1)[0] + '/')

@@ -58,7 +58,7 @@
                 <div class="panel-body">
                     <div>
                         {% for i in following %}
-                        <a style="font-size: 17px;" href="{% url 'profile' %}?user={{ i }}">{{ i }}</a>
+                        <a style="font-size: 17px;" href="{% url 'profile' %}?user={{ i }}">{{ i }}</a><br>
                         {% endfor %}
                         {% if not following %}
                         <a style="text-decoration: none; color: black;">Empty...</a>
@@ -78,7 +78,7 @@
                     <div class="panel-body">
                         <div>
                             {% for i in followers %}
-                            <a style="font-size: 17px;" href="{% url 'profile' %}?user={{ i }}">{{ i }}</a>
+                            <a style="font-size: 17px;" href="{% url 'profile' %}?user={{ i }}">{{ i }}</a><br>
                             {% endfor %}
                             {% if not followers %}
                             <a style="text-decoration: none; color: black;">Empty...</a>
